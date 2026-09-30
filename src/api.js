@@ -9,9 +9,13 @@ async function read(res) {
   if (!res.ok || data.error) throw new Error(data.error || "Something went wrong. Try again.");
   return data;
 }
+// Where the API lives. Empty means this same site (local dev, or the Docker image that serves both). When the app is a
+// separate static site, set VITE_API_BASE at build time to the API's address, e.g. in frontend/.env.production:
+//   VITE_API_BASE=https://pillar-api.<something>.azurecontainerapps.io
+const BASE = (import.meta.env.VITE_API_BASE || "").replace(/\/+$/, "");
 function fetch(url, opts = {}) {
   const t = token();
-  return window.fetch(url, { ...opts, headers: { ...(opts.headers || {}), ...(t ? { Authorization: `Bearer ${t}` } : {}) } });
+  return window.fetch(BASE + url, { ...opts, headers: { ...(opts.headers || {}), ...(t ? { Authorization: `Bearer ${t}` } : {}) } });
 }
 const qs = (params) =>
   new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== "")).toString();
